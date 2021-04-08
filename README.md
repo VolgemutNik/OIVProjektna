@@ -1,4 +1,5 @@
-# OIV Projektna naloga
+OIV Projektna naloga
+---
 - Naslov:  
     `Razvoj vtičnika za podpisovanje in šifriranje spletne pošte`
 
@@ -7,10 +8,12 @@
     * Luka Ogrizek (luka.ogrizek@student.um.si),
     * Nik Kovačević (nik.kovacevic@student.um.si),
     * Nik Volgemut (nik.volgemut@student.um.si),
-    * Marko Pavićević (?)
+    * Marko Pavićević (marko.pavicevic@student.um.si)
   
 - Navodila:
   ```
   Razvijte vtičnika za brskalnik Firefox, ki omogoča digitalno podpisovanje in šifriranje spletne pošte. Pri tem se omejite na eno izmed poštnih storitev na spletu (npr. gmail, ...).
   Program naj ima okenski (spletni) uporabniški vmesnik, preko katerega lahko vnesemo parametre in pridobimo rezultate.
   ```
+  
+- Rok za predstavitev: **14.4.2021**
