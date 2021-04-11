@@ -18,5 +18,15 @@
         "src/plugin.js"
       ]
     }
-  ]
+  ],
+
+  "browser_action": {
+    "browser_style" : true,
+    "default_icon" : {
+      "16" : "icon/Login.svg" 
+    },
+    "default_title" : "OIV projektna",
+    "default_popup" : "popup/okno.html"
+  }
+
 }
