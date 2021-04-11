@@ -3,30 +3,32 @@
   "manifest_version": 2,
   "version": "1.0",
   "description": "Podpisovanje/kriptiranje mailov v odjemalcu Outlook s pomocjo OpenPGP",
+  "content_scripts": [
+    {
+      "js": [
+        "src/plugin.js"
+      ],
+      "matches": [
+        "*://*.outlook.office365.com/mail/*",
+        "*://*.outlook.office.com/mail/*"
+      ]
+    }
+  ],
   "permissions": [
     "activeTab",
     "storage",
     "unlimitedStorage",
-    "*://*.outlook.office365.com/mail/*"
+    "tabs",
+    "*://*.outlook.office365.com/mail/*",
+    "*://*.outlook.office.com/mail/*"
   ],
-  "content_scripts": [
-    {
-      "matches": [
-        "*://*.outlook.office365.com/mail/*"
-      ],
-      "js": [
-        "src/plugin.js"
-      ]
-    }
-  ],
-
   "browser_action": {
-    "browser_style" : true,
-    "default_icon" : {
-      "16" : "icon/Login.svg" 
+    "browser_style": true,
+    "default_icon": {
+      "16": "res/Login.svg"
     },
-    "default_title" : "OIV projektna",
-    "default_popup" : "popup/okno.html"
-  }
-
+    "default_title": "OIV projektna",
+    "default_popup": "view/okno.html"
+  },
+  "content_security_policy": "script-src 'self'; object-src 'self';"
 }

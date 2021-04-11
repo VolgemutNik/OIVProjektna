@@ -1,6 +1,3 @@
-// import {PrivateKey, PublicKey} from "./containers/key";
-// import * as openpgp from "../lib/openpgp.min.mjs";
-
 /*
     outlook divs
  */
@@ -8,6 +5,8 @@ const newMsg = "ms-Button _33rLSYbzxvhXjgYTwfjWQI _1yXkaiMFfrJerhRD_mw8tk _1ojer
 const buttonRow = "ivs3kF0TSy1MNYEjC_hAw";
 const contentDiv = "_4utP_vaqQ3UQZH0GEBVQe B1QSRkzQCtvCtutReyNZ CAUXSSmBTHvYTez0U6p3M _17ghdPL1NLKYjRvmoJgpoK _2s9KmFMlfdGElivl0o-GZb";
 const recipientSpan = "ReadWriteCommonWell-wellItemText wellItemText-228";
+
+console.log("Loaded script");
 
 /*
     config
@@ -23,31 +22,6 @@ const enabled = true;
 //     new PublicKey("","","","")
 // ];
 
-// const newMsgButtonPromise = new Promise(resolve => {
-//    let newMsgButton = document.getElementsByClassName(newMsg).item(0);
-//    let count = 0;
-//    while(!newMsgButton){
-//        count++;
-//        try{
-//            setTimeout(() =>
-//        }catch (e) {
-//             console.log(e.message);
-//        }
-//
-//        if(count > 1000) break;
-//    }
-//    resolve(newMsgButton);
-// });
-//
-// newMsgButtonPromise.then((msgButton) => {
-//     if(msgButton){
-//         msgButton.addEventListener("click", evt => {
-//             console.log("To je dejansko ratalo, woohoo");
-//             //TODO naprej promises
-//         });
-//     }
-// });
-
 window.addEventListener("load", evt => {
     console.log("Added onLoad");
     if (enabled) {
@@ -57,15 +31,15 @@ window.addEventListener("load", evt => {
         if (newMsgButton) {
             newMsgButton.addEventListener("click", evt => {
                 console.log("Triggered onClick event");
-                try{
-                    const buttonRowElement = document.getElementsByClassName(buttonRow).item(0);
-                    buttonRowElement.addEventListener("load", evt1 => {
-                        console.log("foo");
-                        buttonRowElement.innerHTML += "TEST";
-                    });
-                }catch (e){
-                    console.error(e.message);
-                }
+                // try{
+                //     const buttonRowElement = document.getElementsByClassName(buttonRow).item(0);
+                //     buttonRowElement.addEventListener("load", evt1 => {
+                //         console.log("foo");
+                //         buttonRowElement.innerHTML += "TEST";
+                //     });
+                // }catch (e){
+                //     console.error(e.message);
+                // }
             });
             console.log("Added listener.")
         }
@@ -84,6 +58,7 @@ const getRecipientEmail = () => {
     }
 }
 
-const encrypt = async () => {
-    //TODO: encryption logic
+const sendMessage = (obj) => {
+    obj = obj || {};
+    browser.runtime.sendMessage(obj);
 }
