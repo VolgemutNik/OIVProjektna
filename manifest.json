@@ -30,5 +30,8 @@
     "default_title": "OIV projektna",
     "default_popup": "view/okno.html"
   },
+  "background": {
+    "page": "view/background.html"
+  },
   "content_security_policy": "script-src 'self'; object-src 'self';"
 }
