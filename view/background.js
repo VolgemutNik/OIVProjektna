@@ -39,12 +39,31 @@ const sendMessage = async (cmd, msg, responseHandler) => {
         });
     tabs.then(tabArr => {
         tabArr.forEach(tab => {
-            browser.tabs.sendMessage(tab.id, obj);
+            browser.tabs
+                .sendMessage(tab.id, obj)
+                .then(response => {
+                    if(responseHandler){
+                        responseHandler(response);
+                    }else{
+                        defaultResponseHandler(response);
+                    }
+                }).catch(e => {
+                    console.error(e.message);
+            });
             console.debug(`Sent message to tab ${tab.id}`);
         });
     }).catch(e => {
         console.error(`An error occured while querying for browser tabs! Message: ${e.message}`);
     });
+};
+
+/**
+ * Handles the incoming message when a custom responseHandler is not defined.
+ *
+ * @param message The message.
+ */
+const defaultResponseHandler = (message) => {
+    console.debug(`Response received: ${message}`);
 };
 
 /**
