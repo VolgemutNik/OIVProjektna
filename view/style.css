@@ -1,8 +1,15 @@
-body {
-    width: 500px;
-    height: 600px;
+.body {
+    width: 400px;
+    height: 500px;
     padding: 10px
 }
+
+.body1 {
+  width: 500px;
+  height: 600px;
+  padding: 10px
+}
+
 
 .switch {
     position: relative;
@@ -82,7 +89,7 @@ body {
   .desno {
       float: left;
       position: absolute;
-      right: 140px;
+      right: 110px;
      
       
   }
