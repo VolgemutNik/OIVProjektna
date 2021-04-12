@@ -128,7 +128,7 @@ const sendMessage = (cmd, msg, responseHandler) => {
                 defaultResponseHandler(response);
             }
         }).catch((e) => {
-            log.error(e);
+            console.error(e);
     });
 }
 
@@ -138,5 +138,5 @@ const sendMessage = (cmd, msg, responseHandler) => {
  * @param message The message.
  */
 const defaultResponseHandler = (message) => {
-    console.debug(`Response recieved: ${message}`);
+    console.debug(`Response received: ${message}`);
 };
