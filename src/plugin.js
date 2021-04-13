@@ -1,5 +1,21 @@
 const extensionId = "oiv@addon.com";
 
+let settings = storage.local.get("settings");
+console.log("Loaded content script");
+
+/**
+ * onChange event handler
+ *
+ * @param changes {object} What was changed.
+ * @param areaName {String} Where this change occurred.
+ */
+const storageChangeHandler = (changes, areaName) => {
+    if (areaName === "local")
+        settings = storage.local.get("settings");
+}
+
+browser.storage.onChanged.addListener(storageChangeHandler);
+
 /*
     Outlook <div> class names.
  */
@@ -8,11 +24,10 @@ const buttonRow = "ivs3kF0TSy1MNYEjC_hAw";
 const contentDiv = "_4utP_vaqQ3UQZH0GEBVQe B1QSRkzQCtvCtutReyNZ CAUXSSmBTHvYTez0U6p3M _17ghdPL1NLKYjRvmoJgpoK _2s9KmFMlfdGElivl0o-GZb";
 const recipientSpan = "ReadWriteCommonWell-wellItemText wellItemText-228";
 
-console.log("Loaded content script");
-
 /*
     Injection logic.
  */
+const button = "<button class=\"CHANGEME\" onclick='clickHandler(e)'>Encrypt</button>";
 
 /**
  * Creates a promise that waits for an element to load into the DOM.
@@ -41,26 +56,21 @@ const waitForElm = (selector) => {
 }
 
 
-window.addEventListener("load", evt => {
-    console.log("Added onLoad");
-    //TODO: implement checking the settings.enabled boolean
-    if (true) {
-        console.log("entered enabled block");
-
-        waitForElm("." + newMsg).then(elm => {
-            console.log(elm.textContent);
-            elm.addEventListener("click", evt => {
-                console.log("Triggered onClick event");
-                waitForElm("." + buttonRow).then(elm1 => {
-                    console.log(elm1.textContent);
-                    //FIXME: accurate button html
-                    elm1.innerHTML += "TEST";
-                })
-            });
+//TODO: implement checking the settings.enabled boolean
+if (true) {
+    waitForElm("." + newMsg).then(elm => {
+        console.log(elm.textContent);
+        elm.addEventListener("click", evt => {
+            console.log("Triggered onClick event");
+            waitForElm("." + buttonRow).then(elm1 => {
+                console.log(elm1.textContent);
+                if (!buttonRow.innerHtml.contains(button))
+                    buttonRow.innerHtml += button;
+            })
         });
+    });
 
-    }
-});
+}
 
 /*
     Main extension logic.
@@ -84,8 +94,6 @@ const getRecipientEmail = () => {
     return "";
 }
 
-browser.runtime.onMessage.addListener(handleMessage);
-
 /**
  * onMessage event handler
  *
@@ -104,7 +112,9 @@ const handleMessage = (data, sender, sendResponse) => {
         default:
             console.debug("Invalid command code");
     }
-};
+}
+
+browser.runtime.onMessage.addListener(handleMessage);
 
 /**
  * Send a message object to all onMessage listeners with a specified message type.
@@ -122,10 +132,10 @@ const sendMessage = (cmd, msg, responseHandler = defaultResponseHandler) => {
     browser.runtime
         .sendMessage(extensionId, obj)
         .then((response) => {
-            if(response)
+            if (response)
                 responseHandler(response);
         }).catch((e) => {
-            console.error(e);
+        console.error(e);
     });
 }
 
@@ -136,4 +146,13 @@ const sendMessage = (cmd, msg, responseHandler = defaultResponseHandler) => {
  */
 const defaultResponseHandler = (message) => {
     console.debug(`Response received: ${message}`);
-};
+}
+
+/**
+ * Handles the onClick event on the injected button
+ *  TODO: sending data to background script for encryption
+ * @param e {Event}
+ */
+const clickHandler = (e) => {
+
+}

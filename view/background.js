@@ -1,21 +1,32 @@
 import {PublicKey, PrivateKey} from "../src/containers/key";
 import * as openpgp from "../lib/openpgp.min.mjs";
 
-//TODO: settings persistence
 const extensionId = "oiv@addon.com";
-const settings = {
-    enabled: true,
-    publicKeys: [
-        new PublicKey("", "", "", ""),
-        new PublicKey("", "", "", "")
-    ],
-    userKeys: {
-        "public": new PublicKey("", "", "", ""),
-        "private": new PrivateKey("", "", "", "", "")
-    }
-};
+// const settings = {
+//     enabled: true,
+//     publicKeys: [
+//         new PublicKey("", "", "", ""),
+//         new PublicKey("", "", "", "")
+//     ],
+//     userKeys: {
+//         "public": new PublicKey("", "", "", ""),
+//         "private": new PrivateKey("", "", "", "", "")
+//     }
+// };
+let settings = storage.local.get("settings") || {};
 
-browser.runtime.onMessage.addListener(handleMessage);
+/**
+ * onChange event handler
+ *
+ * @param changes {object} What was changed.
+ * @param areaName {String} Where this change occured.
+ */
+const storageChangeHandler = (changes, areaName) => {
+    if (areaName === "local")
+        settings = storage.local.get("settings");
+}
+
+browser.storage.onChanged.addListener(storageChangeHandler);
 
 /**
  * Sends a message object to all available content scripts.
@@ -32,7 +43,7 @@ const sendMessage = async (cmd, msg, responseHandler = defaultResponseHandler) =
 
     const tabs = browser.tabs
         .query({
-            url:[
+            url: [
                 "*://*.outlook.office365.com/mail/*",
                 "*://*.outlook.office.com/mail/*"
             ]
@@ -42,10 +53,10 @@ const sendMessage = async (cmd, msg, responseHandler = defaultResponseHandler) =
             browser.tabs
                 .sendMessage(tab.id, obj)
                 .then(response => {
-                    if(response)
+                    if (response)
                         responseHandler(response);
                 }).catch(e => {
-                    console.error(e.message);
+                console.error(e.message);
             });
             console.debug(`Sent message to tab ${tab.id}`);
         });
@@ -78,10 +89,21 @@ const handleMessage = (data, sender, sendResponse) => {
         case "ping":
             sendResponse("pong");
             break;
+        case "encrypt":
+            encrypt(data.msg)
+                .then(encrypted => {
+                    sendResponse("encrypted");
+                }).catch(e => {
+                console.error(`An error has occurred while trying to encrypt data. See message for more info: ${e.message}`);
+
+            });
+            break;
         default:
             console.debug("Invalid command code");
     }
 };
+
+browser.runtime.onMessage.addListener(handleMessage);
 
 /**
  * Encrypts the data using the OpenPGP.js library.
