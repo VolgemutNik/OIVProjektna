@@ -8,7 +8,7 @@ const settings = {
     ],
     userKeys: {
         "public": new PublicKey("", "", "", ""),
-        "private": new PrivateKey("", "", "", "", "")
+        "private": new PrivateKey("", "", "", "", "", "")
     }
 };
 
@@ -50,6 +50,12 @@ waitForElm("#checkbox1").then(elm => {
     });
 });
 
+waitForElm("#btn").then(elm => {
+    elm.addEventListener("click", evt => {
+        savepublic();
+    });
+});
+
 
 
 
@@ -79,14 +85,17 @@ function saveuser() {
     var inputemail = document.getElementById("inputemail");
     var inputpublic = document.getElementById("inputpublic");
     var inputpriv = document.getElementById("inputpriv");
+    var inputgeslo = document.getElementById("inputgeslo");
+
 
     let ime = inputime.value;
     let priimek = inputpriimek.value;
     let email = inputemail.value;
     let pubkey = inputpublic.value;
     let privkey = inputpriv.value;
+    let geslo = inputgeslo.value;
 
-    let privat = new PrivateKey(ime,priimek,email,privkey);
+    let privat = new PrivateKey(ime,priimek,email,privkey, geslo);
     let publickey = new PublicKey(ime,priimek,email,pubkey);
 
     console.log(privat);
@@ -96,3 +105,26 @@ function saveuser() {
     settings.userKeys.private = privat;
 
 }
+
+function savepublic() {
+
+    console.log("123223")
+
+    var inputime1 = document.getElementById("ime2");
+    var inputpriimek1 = document.getElementById("priimek2");
+    var inputemail1 = document.getElementById("email2");
+    var inputpublic1 = document.getElementById("tuji2");
+   
+    
+    let ime = inputime1.value;
+    let priimek = inputpriimek1.value;
+    let email = inputemail1.value;
+    let pubkey = inputpublic1.value;
+
+    
+    
+    //console.log(publickey);
+
+    settings.publicKeys.push(new PublicKey(ime,priimek,email,pubkey));
+        console.log(settings);
+};

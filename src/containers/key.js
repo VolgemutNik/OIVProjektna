@@ -3,7 +3,7 @@ export class PublicKey {
         this.ime = ime;
         this.priimek = priimek;
         this.email = email;
-        this.publicKey = publicKey;
+        this.key = publicKey;
     }
 
     toString() {

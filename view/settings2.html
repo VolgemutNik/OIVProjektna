@@ -30,31 +30,34 @@
 
     <br>
 <container>
+
+  <form id="formica">
     <div class="form-group">
         <label for="inputIme">Ime</label>
-        <input type="text" class="form-control" placeholder="Vpišite ime">
+        <input type="text" class="form-control" id="ime2" placeholder="Vpišite ime">
     </div>
     <div class="form-group">
         <label for="inputPriimek">Priimek</label>
-        <input type="text" class="form-control" placeholder="Vpišite priimek">
+        <input type="text" class="form-control" id="priimek2" placeholder="Vpišite priimek">
     </div>
     <div class="form-group">
         <label for="exampleInputEmail1">Email</label>
-        <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Vpišite svoj email">
+        <input type="email" class="form-control" id="email2" aria-describedby="emailHelp" placeholder="Vpišite svoj email">
 
       </div>
 
 
     <div class="form-group">
-        <label for="inputPrivat1">Tuji privatni ključ</label>
-        <input type="text" class="form-control" placeholder="Vpišite svoj privatni ključ">
+        <label for="inputPrivat1">Tuji javni ključ</label>
+        <input type="text" class="form-control" id="tuji2" placeholder="Vpišite svoj privatni ključ">
     </div>
 
-    <button type="submit" class="btn btn-primary">Submit</button>
+    <button type="submit" class="btn btn-primary" value="submit" id="btn">Submit</button>
   </form>
 
 </container>
 
+<script type="module" src="view.js"></script>
     
 </body>
 </html>
