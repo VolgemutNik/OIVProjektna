@@ -1,6 +1,6 @@
-import {PublicKey, PrivateKey} from "../src/containers/key.js";
+import { PublicKey, PrivateKey } from "../src/containers/key.js";
 
-const settings = {
+let settings = {
     enabled: true,
     publicKeys: [
         new PublicKey("", "", "", ""),
@@ -18,7 +18,7 @@ const settings = {
  * @param selector The selector of the element we are waiting for.
  * @returns {Promise<unknown>} The promise.
  */
- const waitForElm = (selector) => {
+const waitForElm = (selector) => {
     return new Promise(resolve => {
         if (document.querySelector(selector)) {
             return resolve(document.querySelector(selector));
@@ -95,15 +95,17 @@ function saveuser() {
     let privkey = inputpriv.value;
     let geslo = inputgeslo.value;
 
-    let privat = new PrivateKey(ime,priimek,email,privkey, geslo);
-    let publickey = new PublicKey(ime,priimek,email,pubkey);
+    let privat = new PrivateKey(ime, priimek, email, privkey, geslo);
+    let publickey = new PublicKey(ime, priimek, email, pubkey);
 
     console.log(privat);
     console.log(publickey);
-    
+
     settings.userKeys.public = publickey;
     settings.userKeys.private = privat;
 
+    localStorage.setItem('settings', JSON.stringify(settings));
+    console.log(JSON.parse(localStorage.getItem('settings')));
 }
 
 function savepublic() {
@@ -114,17 +116,15 @@ function savepublic() {
     var inputpriimek1 = document.getElementById("priimek2");
     var inputemail1 = document.getElementById("email2");
     var inputpublic1 = document.getElementById("tuji2");
-   
-    
+
+
     let ime = inputime1.value;
     let priimek = inputpriimek1.value;
     let email = inputemail1.value;
     let pubkey = inputpublic1.value;
 
-    
-    
-    //console.log(publickey);
+    settings.publicKeys.push(new PublicKey(ime, priimek, email, pubkey));
 
-    settings.publicKeys.push(new PublicKey(ime,priimek,email,pubkey));
-        console.log(settings);
+    localStorage.setItem('settings', JSON.stringify(settings));
+    console.log(JSON.parse(localStorage.getItem('settings')));
 };
