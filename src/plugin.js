@@ -1,6 +1,6 @@
 const extensionId = "oiv@addon.com";
 
-let settings = storage.local.get("settings");
+let settings = browser.storage.local.get("settings");
 console.log("Loaded content script");
 
 /**
@@ -11,17 +11,17 @@ console.log("Loaded content script");
  */
 const storageChangeHandler = (changes, areaName) => {
     if (areaName === "local")
-        settings = storage.local.get("settings");
-}
+        settings = browser.storage.local.get("settings");
+};
 
 browser.storage.onChanged.addListener(storageChangeHandler);
 
 /*
     Outlook <div> class names.
  */
-const newMsg = "ms-Button _33rLSYbzxvhXjgYTwfjWQI _1yXkaiMFfrJerhRD_mw8tk _1ojerECVeZlAkHtklkKOj5 ms-Button--commandBar root-54";
+const newMsg = "_33rLSYbzxvhXjgYTwfjWQI";
 const buttonRow = "ivs3kF0TSy1MNYEjC_hAw";
-const contentDiv = "_4utP_vaqQ3UQZH0GEBVQe B1QSRkzQCtvCtutReyNZ CAUXSSmBTHvYTez0U6p3M _17ghdPL1NLKYjRvmoJgpoK _2s9KmFMlfdGElivl0o-GZb";
+const contentDiv = "_2s9KmFMlfdGElivl0o-GZb";
 const recipientSpan = "ReadWriteCommonWell-wellItemText wellItemText-228";
 
 /*
@@ -53,11 +53,10 @@ const waitForElm = (selector) => {
             subtree: true
         });
     });
-}
-
+};
 
 //TODO: implement checking the settings.enabled boolean
-if (true) {
+if (settings.enabled || true) {
     waitForElm("." + newMsg).then(elm => {
         console.log(elm.textContent);
         elm.addEventListener("click", evt => {
@@ -69,12 +68,12 @@ if (true) {
             })
         });
     });
-
 }
 
 /*
     Main extension logic.
  */
+
 /**
  * Extracts senders email address from the appropriate div element.
  *
@@ -92,7 +91,7 @@ const getRecipientEmail = () => {
     }
 
     return "";
-}
+};
 
 /**
  * onMessage event handler
@@ -112,7 +111,7 @@ const handleMessage = (data, sender, sendResponse) => {
         default:
             console.debug("Invalid command code");
     }
-}
+};
 
 browser.runtime.onMessage.addListener(handleMessage);
 
@@ -137,16 +136,35 @@ const sendMessage = (cmd, msg, responseHandler = defaultResponseHandler) => {
         }).catch((e) => {
         console.error(e);
     });
-}
+};
 
 /**
  * Handles the incoming message when a custom responseHandler is not defined.
  *
- * @param message The message.
+ * @param message {String} The message.
  */
 const defaultResponseHandler = (message) => {
     console.debug(`Response received: ${message}`);
-}
+};
+
+/**
+ * Handles the encryption I/O response.
+ *
+ * @param message {String} The message.
+ */
+const encryptionResponseHandler = (message) => {
+    defaultResponseHandler(message);
+
+    if(message.includes("error")){
+        throw new Error(message);
+    }else{
+        const contentDivElement = document.getElementsByClassName(contentDiv).item(0);
+        if(contentDivElement){
+            contentDivElement.innerHTML = "<div>" + message + "</div>";
+            console.debug("Successfully encrypted main email content.");
+        }
+    }
+};
 
 /**
  * Handles the onClick event on the injected button
@@ -154,5 +172,21 @@ const defaultResponseHandler = (message) => {
  * @param e {Event}
  */
 const clickHandler = (e) => {
+    console.debug("Initiated encryption.");
 
-}
+    const contentDivElement = document.getElementsByClassName(contentDiv).item(0);
+    if(contentDivElement){
+        if(contentDivElement.innerHTML){
+            sendMessage(
+                "encrypt",
+                {
+                    email: getRecipientEmail(),
+                    text:contentDivElement.innerHTML
+                },
+                encryptionResponseHandler
+            );
+        }else{
+            console.debug("There was nothing to encrypt...")
+        }
+    }
+};

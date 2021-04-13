@@ -1,5 +1,4 @@
-import {PublicKey, PrivateKey} from "../src/containers/key";
-import * as openpgp from "../lib/openpgp.min.mjs";
+import * as openpgp from "../lib/openpgp.min.js";
 
 const extensionId = "oiv@addon.com";
 // const settings = {
@@ -13,7 +12,7 @@ const extensionId = "oiv@addon.com";
 //         "private": new PrivateKey("", "", "", "", "")
 //     }
 // };
-let settings = storage.local.get("settings") || {};
+let settings = browser.storage.local.get("settings") || {};
 
 /**
  * onChange event handler
@@ -23,8 +22,8 @@ let settings = storage.local.get("settings") || {};
  */
 const storageChangeHandler = (changes, areaName) => {
     if (areaName === "local")
-        settings = storage.local.get("settings");
-}
+        settings = browser.storage.local.get("settings");
+};
 
 browser.storage.onChanged.addListener(storageChangeHandler);
 
@@ -92,10 +91,9 @@ const handleMessage = (data, sender, sendResponse) => {
         case "encrypt":
             encrypt(data.msg)
                 .then(encrypted => {
-                    sendResponse("encrypted");
+                    sendResponse(encrypted);
                 }).catch(e => {
                 console.error(`An error has occurred while trying to encrypt data. See message for more info: ${e.message}`);
-
             });
             break;
         default:
@@ -108,9 +106,16 @@ browser.runtime.onMessage.addListener(handleMessage);
 /**
  * Encrypts the data using the OpenPGP.js library.
  *  FIXME: actual implementation
- * @param data {String} The data.
+ * @param data {Object} The data.
  * @returns {Promise<void>}
  */
 const encrypt = async (data) => {
+    const email = data.email;
+    const text = data.text;
+
+    if(!email || !text){
+        throw new Error("Error, there was no data to encrypt.");
+    }
+
 
 };
