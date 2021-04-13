@@ -1,6 +1,8 @@
 const extensionId = "oiv@addon.com";
 
-let settings = browser.storage.local.get("settings");
+
+let settings = JSON.parse(localStorage.getItem('settings'));
+//let settings = browser.storage.local.get("settings");
 console.log("Loaded content script");
 
 /**
@@ -9,12 +11,11 @@ console.log("Loaded content script");
  * @param changes {object} What was changed.
  * @param areaName {String} Where this change occurred.
  */
-const storageChangeHandler = (changes, areaName) => {
-    if (areaName === "local")
-        settings = browser.storage.local.get("settings");
+const storageChangeHandler = () => {
+    settings = JSON.parse(localStorage.getItem('settings'));
 };
 
-browser.storage.onChanged.addListener(storageChangeHandler);
+window.addEventListener('storage', storageChangeHandler);
 
 /*
     Outlook <div> class names.
@@ -134,8 +135,8 @@ const sendMessage = (cmd, msg, responseHandler = defaultResponseHandler) => {
             if (response)
                 responseHandler(response);
         }).catch((e) => {
-        console.error(e);
-    });
+            console.error(e);
+        });
 };
 
 /**
@@ -155,11 +156,11 @@ const defaultResponseHandler = (message) => {
 const encryptionResponseHandler = (message) => {
     defaultResponseHandler(message);
 
-    if(message.includes("error")){
+    if (message.includes("error")) {
         throw new Error(message);
-    }else{
+    } else {
         const contentDivElement = document.getElementsByClassName(contentDiv).item(0);
-        if(contentDivElement){
+        if (contentDivElement) {
             contentDivElement.innerHTML = "<div>" + message + "</div>";
             console.debug("Successfully encrypted main email content.");
         }
@@ -175,17 +176,17 @@ const clickHandler = (e) => {
     console.debug("Initiated encryption.");
 
     const contentDivElement = document.getElementsByClassName(contentDiv).item(0);
-    if(contentDivElement){
-        if(contentDivElement.innerHTML){
+    if (contentDivElement) {
+        if (contentDivElement.innerHTML) {
             sendMessage(
                 "encrypt",
                 {
                     email: getRecipientEmail(),
-                    text:contentDivElement.innerHTML
+                    text: contentDivElement.innerHTML
                 },
                 encryptionResponseHandler
             );
-        }else{
+        } else {
             console.debug("There was nothing to encrypt...")
         }
     }
