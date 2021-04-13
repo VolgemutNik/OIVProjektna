@@ -113,7 +113,7 @@ const handleMessage = (data, sender, sendResponse) => {
  * @param msg {any} The message.
  * @param responseHandler {function} A function that will handle the response.
  */
-const sendMessage = (cmd, msg, responseHandler) => {
+const sendMessage = (cmd, msg, responseHandler = defaultResponseHandler) => {
     let obj = {
         cmd: cmd || "unknown",
         msg: msg || ""
@@ -122,11 +122,8 @@ const sendMessage = (cmd, msg, responseHandler) => {
     browser.runtime
         .sendMessage(extensionId, obj)
         .then((response) => {
-            if(responseHandler){
+            if(response)
                 responseHandler(response);
-            }else{
-                defaultResponseHandler(response);
-            }
         }).catch((e) => {
             console.error(e);
     });

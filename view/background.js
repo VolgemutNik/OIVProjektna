@@ -24,7 +24,7 @@ browser.runtime.onMessage.addListener(handleMessage);
  * @param msg {any} The Message object.
  * @param responseHandler {function} A function that will handle the response.
  */
-const sendMessage = async (cmd, msg, responseHandler) => {
+const sendMessage = async (cmd, msg, responseHandler = defaultResponseHandler) => {
     let obj = {
         cmd: cmd || "unknown",
         msg: msg || ""
@@ -42,11 +42,8 @@ const sendMessage = async (cmd, msg, responseHandler) => {
             browser.tabs
                 .sendMessage(tab.id, obj)
                 .then(response => {
-                    if(responseHandler){
+                    if(response)
                         responseHandler(response);
-                    }else{
-                        defaultResponseHandler(response);
-                    }
                 }).catch(e => {
                     console.error(e.message);
             });
