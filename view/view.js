@@ -1,16 +1,24 @@
 import { PublicKey, PrivateKey } from "../src/containers/key.js";
-
 let settings = {
     enabled: true,
-    publicKeys: [
-        new PublicKey("", "", "", ""),
-        new PublicKey("", "", "", "")
-    ],
+    publicKeys: [],
     userKeys: {
-        "public": new PublicKey("", "", "", ""),
-        "private": new PrivateKey("", "", "", "", "", "")
+        "public": {},
+        "private": {}
     }
 };
+
+if (!JSON.parse(localStorage.getItem('settings'))) {
+    localStorage.setItem('settings', JSON.stringify(settings));
+    console.log("setal settinge");
+} else {
+    console.log(JSON.parse(localStorage.getItem('settings')));
+    console.log("settingi že obstajajo");
+}
+
+
+
+
 
 /**
  * Creates a promise that waits for an element to load into the DOM.
@@ -69,6 +77,9 @@ function cbfunction() {
         console.log("false");
         settings.enabled = false;
     }
+
+    localStorage.setItem('settings', JSON.stringify(settings));
+    console.log(JSON.parse(localStorage.getItem('settings')));
 }
 
 
@@ -101,6 +112,8 @@ function saveuser() {
     console.log(privat);
     console.log(publickey);
 
+
+    settings = JSON.parse(localStorage.getItem('settings'));
     settings.userKeys.public = publickey;
     settings.userKeys.private = privat;
 
@@ -122,6 +135,8 @@ function savepublic() {
     let priimek = inputpriimek1.value;
     let email = inputemail1.value;
     let pubkey = inputpublic1.value;
+
+    settings = JSON.parse(localStorage.getItem('settings'));
 
     settings.publicKeys.push(new PublicKey(ime, priimek, email, pubkey));
 
