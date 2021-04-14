@@ -12,20 +12,17 @@ const extensionId = "oiv@addon.com";
 //         "private": new PrivateKey("", "", "", "", "")
 //     }
 // };
-let settings = browser.storage.local.get("settings") || {};
+let settings = JSON.parse(localStorage.getItem('settings'));
 
 /**
  * onChange event handler
  *
- * @param changes {object} What was changed.
- * @param areaName {String} Where this change occured.
  */
-const storageChangeHandler = (changes, areaName) => {
-    if (areaName === "local")
-        settings = browser.storage.local.get("settings");
+const storageChangeHandler = () => {
+    settings = JSON.parse(localStorage.getItem('settings'));
 };
 
-browser.storage.onChanged.addListener(storageChangeHandler);
+window.addEventListener('storage', storageChangeHandler);
 
 /**
  * Sends a message object to all available content scripts.
@@ -105,7 +102,7 @@ browser.runtime.onMessage.addListener(handleMessage);
 
 /**
  * Encrypts the data using the OpenPGP.js library.
- *  FIXME: actual implementation
+ *
  * @param data {Object} The data.
  * @returns {Promise<void>}
  */
@@ -113,9 +110,63 @@ const encrypt = async (data) => {
     const email = data.email;
     const text = data.text;
 
-    if(!email || !text){
-        throw new Error("Error, there was no data to encrypt.");
-    }
+    return new Promise((resolved, rejected) => {
+        if(!email || !text){
+            rejected("error: Missing data needed to encrypt.");
+        }
 
+        const publicKeys = settings.publicKeys || [];
+        let publicKeyObj = {};
 
+        for(let obj of publicKeys){
+            if(obj.email === email){
+                publicKeyObj = obj;
+                break;
+            }
+        }
+
+        if(publicKeyObj){
+            const userKeys = settings.userKeys;
+            if(userKeys.private){
+                openpgpEncrypt(publicKeyObj, userKeys, text)
+                    .then(obj => {
+                        resolved(obj);
+                    }).catch(e => {
+                        rejected(e);
+                });
+            }else{
+                rejected("error: Missing your private key.");
+            }
+        }else{
+            rejected("error: Missing public key of recipient.");
+        }
+    });
+};
+
+/**
+ *
+ * @param publicKeyObj {Object} An object that holds public key data.
+ * @param userKeys {}
+ * @param text {String} The text we are trying to encrypt.
+ * @returns {Promise<String>} The Promise.
+ */
+const openpgpEncrypt = async(publicKeyObj, userKeys, text) => {
+    const publicKeyStr = `-----BEGIN PGP PUBLIC KEY BLOCK-----\n${publicKeyObj.key}\n-----END PGP PUBLIC KEY BLOCK-----`;
+    const privateKeyStr = `-----BEGIN PGP PRIVATE KEY BLOCK-----\n${userKeys.private.key}\n-----END PGP PRIVATE KEY BLOCK-----`;
+    const secret = userKeys.private.secret;
+
+    const publicKey = await openpgp.readKey({ armoredKey: publicKeyStr });
+
+    const privateKey = await openpgp.readKey({ armoredKey: privateKeyStr });
+    await privateKey.decrypt(secret);
+
+    const encryptedMessage = await openpgp.encrypt({
+        message: await openpgp.createMessage({text: text}),
+        publicKeys: publicKey,
+        privateKeys: privateKey
+    });
+
+    console.debug(`Encrypted string: \n${encryptedMessage}`);
+
+    return encryptedMessage;
 };

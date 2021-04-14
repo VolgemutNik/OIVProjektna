@@ -7,9 +7,6 @@ console.log("Loaded content script");
 
 /**
  * onChange event handler
- *
- * @param changes {object} What was changed.
- * @param areaName {String} Where this change occurred.
  */
 const storageChangeHandler = () => {
     settings = JSON.parse(localStorage.getItem('settings'));
@@ -57,7 +54,7 @@ const waitForElm = (selector) => {
 };
 
 //TODO: implement checking the settings.enabled boolean
-if (settings.enabled || true) {
+if (settings.enabled) {
     waitForElm("." + newMsg).then(elm => {
         console.log(elm.textContent);
         elm.addEventListener("click", evt => {
@@ -169,7 +166,7 @@ const encryptionResponseHandler = (message) => {
 
 /**
  * Handles the onClick event on the injected button
- *  TODO: sending data to background script for encryption
+
  * @param e {Event}
  */
 const clickHandler = (e) => {
@@ -187,7 +184,7 @@ const clickHandler = (e) => {
                 encryptionResponseHandler
             );
         } else {
-            console.debug("There was nothing to encrypt...")
+            console.debug("There was nothing to encrypt...");
         }
     }
 };
