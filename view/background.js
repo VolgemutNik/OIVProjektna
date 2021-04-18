@@ -1,4 +1,4 @@
-import * as openpgp from "../lib/openpgp.min.js";
+import * as openpgp from "../lib/openpgp.min.mjs";
 
 const extensionId = "oiv@addon.com";
 // const settings = {
@@ -79,7 +79,7 @@ const defaultResponseHandler = (message) => {
  */
 const handleMessage = (data, sender, sendResponse) => {
     data = data || {};
-    console.debug(`Incoming from ${sender} with content: ${data}`);
+    console.debug(`Incoming from ${JSON.stringify(sender)} with content: ${JSON.stringify(data)}`);
 
     switch (data.cmd) {
         case "ping":
@@ -90,7 +90,7 @@ const handleMessage = (data, sender, sendResponse) => {
                 .then(encrypted => {
                     sendResponse(encrypted);
                 }).catch(e => {
-                console.error(`An error has occurred while trying to encrypt data. See message for more info: ${e.message}`);
+                console.error(`An error has occurred while trying to encrypt data. See message for more info: ${e}`);
             });
             break;
         default:
@@ -151,7 +151,9 @@ const encrypt = async (data) => {
  * @returns {Promise<String>} The Promise.
  */
 const openpgpEncrypt = async(publicKeyObj, userKeys, text) => {
-    const publicKeyStr = `-----BEGIN PGP PUBLIC KEY BLOCK-----\n${publicKeyObj.key}\n-----END PGP PUBLIC KEY BLOCK-----`;
+    console.debug(`Passed data: publicKey:${JSON.stringify(publicKeyObj)}`)
+
+    const publicKeyStr = `-----BEGIN PGP PUBLIC KEY BLOCK-----\n\n${publicKeyObj.key}\n-----END PGP PUBLIC KEY BLOCK-----`;
     const privateKeyStr = `-----BEGIN PGP PRIVATE KEY BLOCK-----\n${userKeys.private.key}\n-----END PGP PRIVATE KEY BLOCK-----`;
     const secret = userKeys.private.secret;
 

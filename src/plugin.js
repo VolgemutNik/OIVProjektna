@@ -4,12 +4,14 @@ const extensionId = "oiv@addon.com";
 let settings = JSON.parse(localStorage.getItem('settings'));
 //let settings = browser.storage.local.get("settings");
 console.log("Loaded content script");
+console.log(`Loaded global settings with value: ${settings}`);
 
 /**
  * onChange event handler
  */
 const storageChangeHandler = () => {
     settings = JSON.parse(localStorage.getItem('settings'));
+    console.log("Updated settings")
 };
 
 window.addEventListener('storage', storageChangeHandler);
@@ -20,12 +22,13 @@ window.addEventListener('storage', storageChangeHandler);
 const newMsg = "_33rLSYbzxvhXjgYTwfjWQI";
 const buttonRow = "ivs3kF0TSy1MNYEjC_hAw";
 const contentDiv = "_2s9KmFMlfdGElivl0o-GZb";
-const recipientSpan = "ReadWriteCommonWell-wellItemText wellItemText-228";
+const recipientSpan = "ReadWriteCommonWell-wellItemText wellItemText-";
+const recipientRootDiv = "_3Yr_hO7j5doGUkhrRiP6uY";
 
 /*
     Injection logic.
  */
-const button = "<button class=\"CHANGEME\" onclick='clickHandler(e)'>Encrypt</button>";
+const button = "<button id=\"krekpakurbe\">Encrypt</button>";
 
 /**
  * Creates a promise that waits for an element to load into the DOM.
@@ -53,20 +56,25 @@ const waitForElm = (selector) => {
     });
 };
 
-//TODO: implement checking the settings.enabled boolean
-if (settings.enabled) {
-    waitForElm("." + newMsg).then(elm => {
-        console.log(elm.textContent);
-        elm.addEventListener("click", evt => {
-            console.log("Triggered onClick event");
-            waitForElm("." + buttonRow).then(elm1 => {
-                console.log(elm1.textContent);
-                if (!buttonRow.innerHtml.contains(button))
-                    buttonRow.innerHtml += button;
-            })
-        });
+waitForElm("." + newMsg).then(elm => {
+    console.log(elm.textContent);
+    elm.addEventListener("click", evt => {
+        console.log("Triggered onClick event");
+        waitForElm("." + buttonRow).then(elm1 => {
+            console.log(elm1.textContent);
+            //if(settings.enabled){
+            const buttonRowElement = document.getElementsByClassName(buttonRow).item(0);
+            if (buttonRowElement) {
+                buttonRowElement.innerHTML += button;
+                waitForElm("#krekpakurbe").then(elm2 => {
+                    elm2.addEventListener("click", clickHandler);
+                    console.debug("Added krekpakurbe onClick listener");
+                });
+            }
+            //}
+        })
     });
-}
+});
 
 /*
     Main extension logic.
@@ -78,16 +86,30 @@ if (settings.enabled) {
  * @returns {string} The extracted email.
  */
 const getRecipientEmail = () => {
-    //Ime Priimek <ime.priimek@student.um.si>
-    const recipientSpanElement = document.getElementsByClassName(recipientSpan).item(0);
-    if (recipientSpanElement) {
-        const text = recipientSpanElement.innerHTML;
-        const split = text.split(" ");
-        const foo = split[split.length - 1];
-
-        return foo.substring(1, foo.length - 1);
+    let spans = [];
+    const recipientRootDivElement = document.getElementsByClassName(recipientRootDiv).item(0);
+    if (recipientRootDivElement) {
+        const spanList = recipientRootDivElement.getElementsByTagName("span");
+        if (spanList.length > 0) {
+            for (let spanElement of spanList) {
+                if (spanElement.className.includes(recipientSpan)) {
+                    let text = spanElement.innerHTML;
+                    if (text.includes("&lt;")) {
+                        text = text.split("&lt;")[1].split("&gt;")[0];
+                    }
+                    spans.push(text);
+                }
+            }
+            console.debug("Populated spans array.")
+        } else {
+            console.error("Could not find child elements of type span.")
+        }
     }
 
+    if (spans) {
+        return spans[0]; //TODO: If we ever implement multiple recipients change this.
+    }
+    console.debug("error: no email was found.")
     return "";
 };
 
@@ -132,8 +154,8 @@ const sendMessage = (cmd, msg, responseHandler = defaultResponseHandler) => {
             if (response)
                 responseHandler(response);
         }).catch((e) => {
-            console.error(e);
-        });
+        console.error(e);
+    });
 };
 
 /**
@@ -167,14 +189,16 @@ const encryptionResponseHandler = (message) => {
 /**
  * Handles the onClick event on the injected button
 
- * @param e {Event}
+ * @param e {Event} Holds click event info.
  */
 const clickHandler = (e) => {
     console.debug("Initiated encryption.");
+    console.debug(getRecipientEmail());
 
     const contentDivElement = document.getElementsByClassName(contentDiv).item(0);
     if (contentDivElement) {
         if (contentDivElement.innerHTML) {
+            console.log("Sent encryption over to background");
             sendMessage(
                 "encrypt",
                 {

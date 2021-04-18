@@ -69,6 +69,7 @@ waitForElm("#btn").then(elm => {
 
 function cbfunction() {
     let cb = document.getElementById("checkbox1");
+    settings = JSON.parse(localStorage.getItem('settings'));
 
     if (cb.checked == true) {
         console.log("true");
