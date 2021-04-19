@@ -1,20 +1,44 @@
 const extensionId = "oiv@addon.com";
 
-
-let settings = JSON.parse(localStorage.getItem('settings'));
-//let settings = browser.storage.local.get("settings");
-console.log("Loaded content script");
-console.log(`Loaded global settings with value: ${settings}`);
+let settings = {};
 
 /**
- * onChange event handler
+ * Return settings from browser.storage.local.
+ *
+ * @returns {any}
  */
-const storageChangeHandler = () => {
-    settings = JSON.parse(localStorage.getItem('settings'));
-    console.log("Updated settings")
-};
+const getFromStorage = async () => {
+    return browser
+        .storage
+        .local
+        .get("settings")
+        .then(obj => {
+            return obj["settings"];
+        }, e => {
+            console.error(e);
+        });
+}
 
-window.addEventListener('storage', storageChangeHandler);
+(async () => {
+    browser
+        .storage
+        .onChanged
+        .addListener((changes, areaName) => {
+            if (areaName === "local") {
+                console.debug("Settings updated.");
+                getFromStorage().then(obj => settings = (obj) ? obj : settings);
+            }
+        });
+
+    getFromStorage().then(r => {
+        if (r) {
+            settings = r;
+            console.debug("Loaded settings.")
+        } else {
+            console.debug("Global settings not set.")
+        }
+    });
+})();
 
 /*
     Outlook <div> class names.
@@ -57,21 +81,19 @@ const waitForElm = (selector) => {
 };
 
 waitForElm("." + newMsg).then(elm => {
-    console.log(elm.textContent);
     elm.addEventListener("click", evt => {
         console.log("Triggered onClick event");
         waitForElm("." + buttonRow).then(elm1 => {
-            console.log(elm1.textContent);
-            //if(settings.enabled){
-            const buttonRowElement = document.getElementsByClassName(buttonRow).item(0);
-            if (buttonRowElement) {
-                buttonRowElement.innerHTML += button;
-                waitForElm("#krekpakurbe").then(elm2 => {
-                    elm2.addEventListener("click", clickHandler);
-                    console.debug("Added krekpakurbe onClick listener");
-                });
+            if (settings.enabled) {
+                const buttonRowElement = document.getElementsByClassName(buttonRow).item(0);
+                if (buttonRowElement) {
+                    buttonRowElement.innerHTML += button;
+                    waitForElm("#krekpakurbe").then(elm2 => {
+                        elm2.addEventListener("click", clickHandler);
+                        console.debug("Added encrypt button onClick listener");
+                    });
+                }
             }
-            //}
         })
     });
 });
@@ -155,7 +177,7 @@ const sendMessage = (cmd, msg, responseHandler = defaultResponseHandler) => {
         .sendMessage(extensionId, obj)
         .then((response) => {
             console.log(response);
-            if(response)
+            if (response)
                 responseHandler(response);
         }, (e) => {
             console.error(e);

@@ -1,4 +1,8 @@
-import { PublicKey, PrivateKey } from "../src/containers/key.js";
+import {PublicKey, PrivateKey} from "../src/containers/key.js";
+
+/*
+    Settings
+ */
 let settings = {
     enabled: true,
     publicKeys: [],
@@ -8,18 +12,80 @@ let settings = {
     }
 };
 
-if (!JSON.parse(localStorage.getItem('settings'))) {
-    localStorage.setItem('settings', JSON.stringify(settings));
-    console.log("setal settinge");
-} else {
-    console.log(JSON.parse(localStorage.getItem('settings')));
-    console.log("settingi že obstajajo");
+/**
+ * Saves a key value pair to browser.storage.local
+ *
+ * @param key {String}
+ * @param value {Object}
+ */
+const saveToStorage = (key, value) => {
+    let data = {
+        [key]: value
+    }
+
+    browser
+        .storage
+        .local
+        .set(data)
+        .then(() => {
+            console.debug(`Saved obj(${JSON.stringify(value)}) to key(${key}).`)
+        }, e => {
+            console.error(e);
+        });
 }
 
+/**
+ * Saves the settings object to browser.storage.local
+ */
+const saveSettings = () => {
+    saveToStorage("settings", settings);
+}
 
+/**
+ * Return settings from browser.storage.local.
+ *
+ * @returns {any}
+ */
+const getFromStorage = async () => {
+    return browser
+        .storage
+        .local
+        .get("settings")
+        .then(obj => {
+            return obj["settings"];
+        }, e => {
+            console.error(e);
+        });
+}
 
+(async () => {
+    browser
+        .storage
+        .onChanged
+        .addListener((changes, areaName) => {
+            if (areaName === "local") {
+                console.debug("Settings updated.")
+                getFromStorage().then(obj => settings = (obj) ? obj : settings);
+            }
+        });
 
+    getFromStorage().then(r => {
+        if (r) {
+            settings = r;
+            const cb = document.getElementById("checkbox1");
+            if (cb) cb.checked = settings.enabled;
 
+            console.debug("Loaded settings.")
+        } else {
+            saveToStorage("settings", settings);
+            console.log("Populated storage with default settings.");
+        }
+    });
+})();
+
+/*
+*   Event injection
+*/
 /**
  * Creates a promise that waits for an element to load into the DOM.
  *
@@ -47,100 +113,60 @@ const waitForElm = (selector) => {
 }
 
 waitForElm("#gumbek").then(elm => {
-    elm.addEventListener("click", evt => {
-        saveuser();
-    });
+    elm.addEventListener("click", event => saveUser(event));
 });
 
 waitForElm("#checkbox1").then(elm => {
-    elm.addEventListener("change", evt => {
-        cbfunction();
-    });
+    elm.addEventListener("change", event => cbFunction());
 });
 
 waitForElm("#btn").then(elm => {
-    elm.addEventListener("click", evt => {
-        savepublic();
-    });
+    elm.addEventListener("click", event => savePublic(event));
 });
 
+/*
+    Main logic
+ */
+function cbFunction() {
+    const cb = document.getElementById("checkbox1");
+    console.log("Change event.");
 
+    if (cb) {
+        settings.enabled = cb.checked;
+        console.debug(settings.enabled);
 
-
-function cbfunction() {
-    let cb = document.getElementById("checkbox1");
-    settings = JSON.parse(localStorage.getItem('settings'));
-
-    if (cb.checked == true) {
-        console.log("true");
-        settings.enabled = true;
-    } else {
-        console.log("false");
-        settings.enabled = false;
+        saveSettings();
     }
-
-    localStorage.setItem('settings', JSON.stringify(settings));
-    console.log(JSON.parse(localStorage.getItem('settings')));
 }
 
+function saveUser(e) {
+    e.preventDefault();
 
+    let ime = document.getElementById("inputime1").value;
+    let priimek = document.getElementById("inputpriimek").value;
+    let email = document.getElementById("inputemail").value;
+    let pubkey = document.getElementById("inputpublic").value;
+    let privkey = document.getElementById("inputpriv").value;
+    let geslo = document.getElementById("inputgeslo").value;
 
+    settings.userKeys.public = new PublicKey(ime, priimek, email, pubkey);
+    settings.userKeys.private = new PrivateKey(ime, priimek, email, privkey, geslo);
 
-
-
-function saveuser() {
-
-    console.log("test");
-
-    var inputime = document.getElementById("inputime1");
-    var inputpriimek = document.getElementById("inputpriimek");
-    var inputemail = document.getElementById("inputemail");
-    var inputpublic = document.getElementById("inputpublic");
-    var inputpriv = document.getElementById("inputpriv");
-    var inputgeslo = document.getElementById("inputgeslo");
-
-
-    let ime = inputime.value;
-    let priimek = inputpriimek.value;
-    let email = inputemail.value;
-    let pubkey = inputpublic.value;
-    let privkey = inputpriv.value;
-    let geslo = inputgeslo.value;
-
-    let privat = new PrivateKey(ime, priimek, email, privkey, geslo);
-    let publickey = new PublicKey(ime, priimek, email, pubkey);
-
-    console.log(privat);
-    console.log(publickey);
-
-
-    settings = JSON.parse(localStorage.getItem('settings'));
-    settings.userKeys.public = publickey;
-    settings.userKeys.private = privat;
-
-    localStorage.setItem('settings', JSON.stringify(settings));
-    console.log(JSON.parse(localStorage.getItem('settings')));
+    saveSettings();
 }
 
-function savepublic() {
+function savePublic(e) {
+    e.preventDefault();
 
-    console.log("123223")
+    settings
+        .publicKeys
+        .push(
+            new PublicKey(
+                document.getElementById("ime2").value,
+                document.getElementById("priimek2").value,
+                document.getElementById("email2").value,
+                document.getElementById("tuji2").value
+            ));
 
-    var inputime1 = document.getElementById("ime2");
-    var inputpriimek1 = document.getElementById("priimek2");
-    var inputemail1 = document.getElementById("email2");
-    var inputpublic1 = document.getElementById("tuji2");
-
-
-    let ime = inputime1.value;
-    let priimek = inputpriimek1.value;
-    let email = inputemail1.value;
-    let pubkey = inputpublic1.value;
-
-    settings = JSON.parse(localStorage.getItem('settings'));
-
-    settings.publicKeys.push(new PublicKey(ime, priimek, email, pubkey));
-
-    localStorage.setItem('settings', JSON.stringify(settings));
-    console.log(JSON.parse(localStorage.getItem('settings')));
-};
+    saveSettings();
+}
