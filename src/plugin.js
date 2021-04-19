@@ -128,6 +128,9 @@ const handleMessage = (data, sender, sendResponse) => {
         case "ping":
             sendResponse("pong");
             break;
+        case "encrypted":
+            encryptionResponseHandler(data.msg);
+            break;
         default:
             console.debug("Invalid command code");
     }
@@ -151,17 +154,18 @@ const sendMessage = (cmd, msg, responseHandler = defaultResponseHandler) => {
     browser.runtime
         .sendMessage(extensionId, obj)
         .then((response) => {
-            if (response)
+            console.log(response);
+            if(response)
                 responseHandler(response);
-        }).catch((e) => {
-        console.error(e);
-    });
+        }, (e) => {
+            console.error(e);
+        });
 };
 
 /**
  * Handles the incoming message when a custom responseHandler is not defined.
  *
- * @param message {String} The message.
+ * @param message {any} The message.
  */
 const defaultResponseHandler = (message) => {
     console.debug(`Response received: ${message}`);
@@ -170,7 +174,7 @@ const defaultResponseHandler = (message) => {
 /**
  * Handles the encryption I/O response.
  *
- * @param message {String} The message.
+ * @param message {object} The message.
  */
 const encryptionResponseHandler = (message) => {
     defaultResponseHandler(message);
@@ -180,7 +184,7 @@ const encryptionResponseHandler = (message) => {
     } else {
         const contentDivElement = document.getElementsByClassName(contentDiv).item(0);
         if (contentDivElement) {
-            contentDivElement.innerHTML = "<div>" + message + "</div>";
+            contentDivElement.innerHTML = "<div>" + message.replaceAll("\n", "<br>") + "</div>";
             console.debug("Successfully encrypted main email content.");
         }
     }
